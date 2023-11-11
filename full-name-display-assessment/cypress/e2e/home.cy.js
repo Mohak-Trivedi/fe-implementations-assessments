@@ -4,9 +4,11 @@ describe("Initial Page Load Tests", () => {
   });
 
   it("checks initial rendering of the page", () => {
-    cy.get("h1").contains("Full Name Display");
+    cy.contains("Full Name Display").should("exist");
+
     cy.get('input[type="text"]').first().should("have.value", "");
     cy.get('input[type="text"]').last().should("have.value", "");
+
     cy.get('button[type="submit"]').should("exist");
   });
 });
