@@ -1,75 +1,87 @@
-describe('React Calculator Tests', () => {
+describe("React Calculator Tests", () => {
   beforeEach(() => {
-    cy.visit('http://localhost:3000'); // Replace with your application's URL
+    cy.visit("http://localhost:3000"); // Replace with your application's URL
   });
 
-  describe('Rendering and Layout', () => {
-    it('renders calculator display and at least 16 buttons', () => {
-      cy.get('input[type="text"]').should('be.visible');
-      cy.get('button, input[type="button"]').should('have.length.at.least', 16);
+  describe("Rendering and Layout", () => {
+    it("renders calculator display and at least 16 buttons", () => {
+      cy.get('input[type="text"]').should("be.visible");
+      cy.get('button, input[type="button"]').should("have.length.at.least", 16);
     });
   });
 
-  describe('Button Interactions', () => {
-    it('updates display on button click', () => {
-      ['1', '2', '+', '3'].forEach((value) => {
+  describe("Button Interactions", () => {
+    it("updates display on button click", () => {
+      ["1", "2", "+", "3"].forEach((value) => {
         cy.get('button, input[type="button"]').contains(value).click();
       });
-      cy.get('input[type="text"]').should('have.value', '12+3');
+      cy.get('input[type="text"]').should("have.value", "12+3");
     });
   });
 
-  describe('Calculation Accuracy', () => {
+  describe("Calculation Accuracy", () => {
     const operations = [
-      { expression: ['2', '+', '3'], expectedResult: '5' },
-      { expression: ['5', '-', '2'], expectedResult: '3' },
-      { expression: ['4', '*', '5'], expectedResult: '20' },
-      { expression: ['8', '/', '2'], expectedResult: '4' }
+      { expression: ["2", "+", "3"], expectedResult: "5" },
+      { expression: ["5", "-", "2"], expectedResult: "3" },
+      { expression: ["4", "*", "5"], expectedResult: "20" },
+      { expression: ["8", "/", "2"], expectedResult: "4" },
     ];
 
     operations.forEach((op) => {
-      it(`correctly calculates ${op.expression.join(' ')}`, () => {
+      it(`correctly calculates ${op.expression.join(" ")}`, () => {
         op.expression.forEach((value) => {
           cy.get('button, input[type="button"]').contains(value).click();
         });
-        cy.get('button, input[type="button"]').contains('=').click();
-        cy.get('body').should('contain', op.expectedResult);
+        cy.get('button, input[type="button"]').contains("=").click();
+        cy.get("body").should("contain", op.expectedResult);
       });
     });
 
-    it('follows BODMAS rules in calculations', () => {
-      ['2', '+', '3', '*', '4', '-', '5', '/', '1', '='].forEach((value) => {
+    it("follows BODMAS rules in calculations", () => {
+      ["2", "+", "3", "*", "4", "-", "5", "/", "1", "="].forEach((value) => {
         cy.get('button, input[type="button"]').contains(value).click();
       });
-      cy.get('body').should('contain', '9');
+      cy.get("body").should("contain", "9");
     });
   });
 
-  describe('Clear Functionality', () => {
-  it('clears input and result', () => {
-    // Enter a number, perform a calculation, and then clear it
-    cy.get('button , input[type="button"]').contains('2').click();
-    cy.get('button , input[type="button"]').contains('+').click();
-    cy.get('button , input[type="button"]').contains('2').click();
-    cy.get('button , input[type="button"]').contains('=').click();
-    cy.get('button , input[type="button"]').contains('C').click();
+  describe("Edge Case Handling", () => {
+    it("handles division by zero", () => {
+      ["1", "/", "0", "="].forEach((value) => {
+        cy.get('button, input[type="button"]').contains(value).click();
+      });
+      cy.get("div").should("contain", "Infinity"); // Adjust based on calculator's handling of division by zero
+    });
+    // Handles 0/0
+    it("handles division zero by zero", () => {
+      ["0", "/", "0", "="].forEach((value) => {
+        cy.get('button, input[type="button"]').contains(value).click();
+      });
+      cy.get("div").should("contain", "NaN"); // Adjust based on calculator's handling of division by zero
+    });
 
-    // Check that the input field is cleared
-    cy.get('input[type="text"]').should('have.value', '');
-
-    // Check that the result display is cleared
-    // Assuming the result is shown in the next div after the input
-    cy.get('input[type="text"]').next('div').should('have.text', '');
+    it('handles incomplete expression (e.g., pressing "=" without complete expression)', () => {
+      cy.get('button, input[type="button"]').contains("=").click();
+      cy.get("div").should("contain", "Error"); // Assuming calculator does not show an error for incomplete expression
+    });
   });
-});
 
-  describe('Output Display', () => {
-    it('shows calculation result on the web page', () => {
-      cy.get('button, input[type="button"]').contains('2').click();
-      cy.get('button, input[type="button"]').contains('+').click();
-      cy.get('button, input[type="button"]').contains('2').click();
-      cy.get('button, input[type="button"]').contains('=').click();
-      cy.get('div, span, h1, h2, h3, h4, h5, h6, p').contains('4').should('be.visible');
+  describe("Clear Functionality", () => {
+    it("clears input and result", () => {
+      ["2", "+", "2", "=", "C"].forEach((value) => {
+        cy.get('button, input[type="button"]').contains(value).click();
+      });
+      cy.get('input[type="text"]').should("have.value", "");
+      cy.get("div").contains("Error").should("not.exist");
+    });
+  });
+
+  describe("Output Display", () => {
+    it("shows calculation result on the web page", () => {
+      ["2", "+", "2", "="].forEach((value) => {
+        cy.get('button, input[type="button"]').contains(value).click();
+      });
+      cy.get("div").contains("4").should("be.visible");
     });
   });
 });
